@@ -4,7 +4,10 @@
 
 
 class QuantizerNotInitializedError(Exception):
-    """Raised when a quantizer has not been initialized"""
+    """
+    自定义异常类，用于在量化器未初始化时抛出异常。
+    Raised when a quantizer has not been initialized
+    """
 
     def __init__(self):
         super(QuantizerNotInitializedError, self).__init__(

@@ -11,16 +11,21 @@ from utils import BaseEnumOptions
 
 
 class ImageInterpolation(BaseEnumOptions):
-    nearest = transforms.InterpolationMode.NEAREST
-    box = transforms.InterpolationMode.BOX
-    bilinear = transforms.InterpolationMode.BILINEAR
-    hamming = transforms.InterpolationMode.HAMMING
-    bicubic = transforms.InterpolationMode.BICUBIC
-    lanczos = transforms.InterpolationMode.LANCZOS
+    """
+    继承自BaseEnumOptions，定义图像插值方法的枚举选项。
+    """
+    nearest = transforms.InterpolationMode.NEAREST      # 最近邻插值
+    box = transforms.InterpolationMode.BOX              # box插值
+    bilinear = transforms.InterpolationMode.BILINEAR    # 双线性插值
+    hamming = transforms.InterpolationMode.HAMMING      # hamming插值
+    bicubic = transforms.InterpolationMode.BICUBIC      # 双三次插值
+    lanczos = transforms.InterpolationMode.LANCZOS      # lanczos插值
 
 
 class ImageNetDataLoaders(object):
     """
+    数据加载器的提供者，专门用于加载ImageNet数据集中的训练集和验证集。
+    该类负责定义数据预处理的转换，创建训练和验证的数据加载器。并提供懒加载机制，确保数据加载器只在需要时才被初始化。
     Data loader provider for ImageNet images, providing a train and a validation loader.
     It assumes that the structure of the images is
         images_dir
@@ -63,9 +68,9 @@ class ImageNetDataLoaders(object):
 
         # For normalization, mean and std dev values are calculated per channel
         # and can be found on the web.
-        normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])     # 定义数据标准化的转换
 
-        self.train_transforms = transforms.Compose(
+        self.train_transforms = transforms.Compose(                 # 定义训练集的数据预处理转换
             [
                 transforms.RandomResizedCrop(image_size, interpolation=interpolation.value),
                 transforms.RandomHorizontalFlip(),
@@ -74,7 +79,7 @@ class ImageNetDataLoaders(object):
             ]
         )
 
-        self.val_transforms = transforms.Compose(
+        self.val_transforms = transforms.Compose(                   # 定义验证集的数据预处理转换
             [
                 transforms.Resize(image_size + 24, interpolation=interpolation.value),
                 transforms.CenterCrop(image_size),
@@ -83,15 +88,19 @@ class ImageNetDataLoaders(object):
             ]
         )
 
+        # 用于懒加载训练和验证的数据加载器
         self._train_loader = None
         self._val_loader = None
 
     @property
     def train_loader(self) -> torch_data.DataLoader:
-        if not self._train_loader:
-            root = os.path.join(self.images_dir, "train")
-            train_set = torchvision.datasets.ImageFolder(root, transform=self.train_transforms)
-            self._train_loader = torch_data.DataLoader(
+        """
+        用于懒加载训练集的数据加载器，只有在第一次访问时才会初始化数据加载器。
+        """
+        if not self._train_loader:                                  # 如果训练集的数据加载器还未初始化
+            root = os.path.join(self.images_dir, "train")           # 训练集的根目录
+            train_set = torchvision.datasets.ImageFolder(root, transform=self.train_transforms)     # 创建训练集数据集
+            self._train_loader = torch_data.DataLoader(             # 创建训练集的数据加载器
                 train_set,
                 batch_size=self.batch_size,
                 shuffle=True,
@@ -102,10 +111,13 @@ class ImageNetDataLoaders(object):
 
     @property
     def val_loader(self) -> torch_data.DataLoader:
-        if not self._val_loader:
-            root = os.path.join(self.images_dir, "val")
-            val_set = torchvision.datasets.ImageFolder(root, transform=self.val_transforms)
-            self._val_loader = torch_data.DataLoader(
+        """
+        用于懒加载验证集的数据加载器，只有在第一次访问时才会初始化数据加载器。
+        """
+        if not self._val_loader:                                    # 如果验证集的数据加载器还未初始化
+            root = os.path.join(self.images_dir, "val")             # 验证集的根目录
+            val_set = torchvision.datasets.ImageFolder(root, transform=self.val_transforms)         # 创建验证集数据集
+            self._val_loader = torch_data.DataLoader(               # 创建验证集的数据加载器
                 val_set,
                 batch_size=self.batch_size,
                 shuffle=False,
